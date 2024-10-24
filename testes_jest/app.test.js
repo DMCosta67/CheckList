@@ -1,5 +1,5 @@
 const { getFormById, getItensById, getEstruById, getDate, getContById, connection } = require('./db');
-
+const axios = require('Axios');
     beforeAll(async () => {
 
         //Inserindo
@@ -25,6 +25,7 @@ const { getFormById, getItensById, getEstruById, getDate, getContById, connectio
     await connection.query('TRUNCATE TABLE estrutura');
     await connection.query('TRUNCATE TABLE conta');
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+    
     await connection.end();
     });
 
@@ -105,11 +106,12 @@ const { getFormById, getItensById, getEstruById, getDate, getContById, connectio
         
     });
 
-    //Formulario_inspecao, Itens e Conta vericando que não seja null
+    //Formulario_inspecao, estrutura, Itens e Conta vericando que não seja null
     test('7 - garantir que não sejam NUll ou Undefined', async () => {
         const formulario_inspecao = await getFormById(1);
         const itens = await getItensById(1);
         const conta = await getContById(1);
+        const estrutura = await getEstruById(1);
 
         //Form
         expect(formulario_inspecao.numEstrutura).not.toBeNull();
@@ -154,12 +156,35 @@ const { getFormById, getItensById, getEstruById, getDate, getContById, connectio
         expect(itens.Sinaliz).not.toBeNull();
         expect(itens.Sinaliz).not.toBeUndefined();
 
-        //conta
-        expect(itens.nomePe).not.toBeNull();
-        expect(itens.nomePe).not.toBeUndefined();
+        //estrutura pode ser Null
+        expect(estrutura.torre).not.toBeUndefined();
 
-        expect(itens.emailPe).not.toBeNull();
-        expect(itens.emailPe).not.toBeUndefined();
+        expect(estrutura.concreto).not.toBeUndefined();
+
+        expect(estrutura.susp).not.toBeUndefined();
+
+        expect(estrutura.ancoragem).not.toBeUndefined();
+
+        expect(estrutura.secc).not.toBeUndefined();
+
+        expect(estrutura.metalica).not.toBeUndefined();
+
+        expect(estrutura.sky).not.toBeUndefined();
+
+        expect(estrutura.id_form).not.toBeUndefined();
+
+        //conta
+        expect(conta.nomePe).not.toBeNull();
+        expect(conta.nomePe).not.toBeUndefined();
+
+        expect(conta.emailPe).not.toBeNull();
+        expect(conta.emailPe).not.toBeUndefined();
+
+        expect(conta.senha).not.toBeNull();
+        expect(conta.senha).not.toBeUndefined();
+
+        expect(conta.nivel).not.toBeNull();
+        expect(conta.nivel).not.toBeUndefined();
     });
 
     //Datas especificas
@@ -180,6 +205,8 @@ const { getFormById, getItensById, getEstruById, getDate, getContById, connectio
         await getFormById(1);
         await getItensById (1); 
         await getEstruById(1);
+        await getContById(1);
+        await getDate('2022-07-08','2022-07-13');
         const fim = performance.now(); //Fim da contagem
 
         const duracao = fim - inicio;
@@ -206,7 +233,7 @@ const { getFormById, getItensById, getEstruById, getDate, getContById, connectio
         const inicio = Date.now();
         let completed = 0;
         for (let i = 0; i < requisicoes; i++) {
-            http.get('http://localhost:3000', (res) =>{
+            axios.get('http://localhost:3000/coelba/1', (res) =>{
                 completed++;
                 if (completed === requisicoes){
                     const tempototal = Date.now() - inicio;
@@ -217,6 +244,6 @@ const { getFormById, getItensById, getEstruById, getDate, getContById, connectio
         }
     }
 
-    performLoadTest(100); //Simula 100 requisições
+    performLoadTest(233); //Simula 1000 requisições     quebra 233
 
 });
