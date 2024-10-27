@@ -1,10 +1,15 @@
 const { getFormById, getItensById, getEstruById, getDate, getContById, connection } = require('./db');
-const axios = require('Axios');
+const axios = require('axios'); 
+const http = require('http');
+
     beforeAll(async () => {
 
         //Inserindo
+        //conta
+        await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Thiago Barros', 'thiaguinhomaroto@gmail.com', 'Barrosmello123', 1)");
+
         //formulario_inspecao
-        await connection.query("INSERT INTO formulario_inspecao (numEstrutura, dataInsp, linhaTrans, Inspetor1, Inspetor2, ativo) VALUES ('202', '2022-07-11', 'CatuRios', 'Daniel', 'Marcos', '1')");
+        await connection.query("INSERT INTO formulario_inspecao (numEstrutura, dataInsp, linhaTrans, Inspetor2, ativo, idConta) VALUES ('202', '2022-07-11', 'CatuRios', 'Marcos', '1', 1)");
         
         //itens
         await connection.query("INSERT INTO itens (Faixa, Base, EstruMetalicas, CadeiadeIsol, CaboCondutor, ChaveSecc, ParaRaios, Sinaliz, id_form) VALUES ('C', 'NC', 'NA', 'C', 'C', 'NC', 'NA', 'C', 1)");
@@ -12,8 +17,6 @@ const axios = require('Axios');
         //estrutura
         await connection.query("INSERT INTO estrutura (torre, concreto, susp, ancoragem, secc, metalica, devConcreto, sky, id_form) VALUES (1, 0, 0, 1, 0, 1, 0, 0, 1)");
 
-        //conta
-        await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Thiago Barros', 'thiaguinhomaroto@gmail.com', 'barrosmello123', 1)");
 }); 
 
     afterAll(async () => {
@@ -39,7 +42,6 @@ const axios = require('Axios');
         expect(formulario_inspecao).toHaveProperty('numEstrutura', 202);
         expect(formulario_inspecao.dataInsp.toISOString().split('T')[0]).toBe('2022-07-11');
         expect(formulario_inspecao).toHaveProperty('linhaTrans', 'CatuRios');
-        expect(formulario_inspecao).toHaveProperty('Inspetor1', 'Daniel');
         expect(formulario_inspecao).toHaveProperty('Inspetor2', 'Marcos');
         expect(formulario_inspecao).toHaveProperty('ativo', 1);
     });
@@ -81,7 +83,7 @@ const axios = require('Axios');
 
         expect(conta).toHaveProperty('nomePe', 'Thiago Barros');
         expect(conta).toHaveProperty('emailPe', 'thiaguinhomaroto@gmail.com');
-        expect(conta).toHaveProperty('senha', 'barrosmello123');
+        expect(conta).toHaveProperty('senha', 'Barrosmello123');
         expect(conta).toHaveProperty('nivel', 1);
 
     });
@@ -94,12 +96,19 @@ const axios = require('Axios');
         expect(conta.emailPe).toMatch(emailRegex);
     });
 
+    //Garantir que a senha esteja em formato valido
+    test('6 - Garantir que a senha está em um formato válido', async () => {
+        const conta = await getContById(1);
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).+/;
+    
+        expect(conta.senha).toMatch(passwordRegex);
+    });
+
     //Formulario_inspecao e conta vericando parte do nome
-    test('6 - verifica parte do nome', async () => {
+    test('7 - verifica parte do nome', async () => {
         const formulario_inspecao = await getFormById(1);
         const conta = await getContById(1);
 
-        expect(formulario_inspecao.Inspetor1).toMatch(/Dan/);
         expect(formulario_inspecao.Inspetor2).toMatch(/Mar/);
 
         expect(conta.nomePe).toMatch(/hiago/);
@@ -107,7 +116,7 @@ const axios = require('Axios');
     });
 
     //Formulario_inspecao, estrutura, Itens e Conta vericando que não seja null
-    test('7 - garantir que não sejam NUll ou Undefined', async () => {
+    test('8 - garantir que não sejam NUll ou Undefined', async () => {
         const formulario_inspecao = await getFormById(1);
         const itens = await getItensById(1);
         const conta = await getContById(1);
@@ -122,9 +131,6 @@ const axios = require('Axios');
         
         expect(formulario_inspecao.linhaTrans).not.toBeNull();
         expect(formulario_inspecao.linhaTrans).not.toBeUndefined();
-
-        expect(formulario_inspecao.Inspetor1).not.toBeNull();
-        expect(formulario_inspecao.Inspetor1).not.toBeUndefined();
 
         expect(formulario_inspecao.Inspetor2).not.toBeNull();
         expect(formulario_inspecao.Inspetor2).not.toBeUndefined();
@@ -188,19 +194,19 @@ const axios = require('Axios');
     });
 
     //Datas especificas
-    test('8 - Deve retornar o Form entre as datas especificadas', async () => {
+    test('9 - Deve retornar o Form entre as datas especificadas', async () => {
         const form = await getDate('2022-07-08','2022-07-13');
         const itens = await getItensById(form.id_form);
         const estrutura = await getEstruById(form.id_form);
 
-        expect(form).toHaveProperty('Inspetor1', 'Daniel', 'Inspetor2', 'Marcos', 'numEstrutura', '202', 'dataInsp', '2022-07-11', 'linhaTrans', 'CatuRios');
+        expect(form).toHaveProperty('Inspetor2', 'Marcos', 'numEstrutura', '202', 'dataInsp', '2022-07-11', 'linhaTrans', 'CatuRios');
         expect(itens).toHaveProperty('Faixa', 'C', 'Base', 'NC', 'EstruMetalicas', 'NA', 'CadeiadeIsol', 'C', 'CaboCondutor', 'C', 'ChaveSecc', 'NC', 'ParaRaios', 'NA', 'Sinaliz', 'C')
         expect(estrutura).toHaveProperty('torre', 1, 'concreto', 0, 'susp', 0, 'ancoragem', 1, 'secc', 0, 'metalica', 1, 'devConcreto', 0, 'sky', 0);
         
     });
 
     //Teste de desempenho
-    test('9 - Verificar se os "gets" responde em menos de 100ms', async () => {
+    test('10 - Verificar se os "gets" responde em menos de 100ms', async () => {
         const inicio = performance.now(); //Inicio da contagem
         await getFormById(1);
         await getItensById (1); 
@@ -215,35 +221,55 @@ const axios = require('Axios');
     });
 
     //Teste de Carga -----------------------
-    const http = require('http');
-    const hostname = '127.0.0.1';
-    const port = 3000;
-
-    const server = http.createServer((req, res) =>{
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('TESTE\n');
-    })
-
-    server.listen(port, hostname, () => {
-        console.log(`servidor rodando em http://${hostname}:${port}/`);
-    })
-
-    const performLoadTest = (requisicoes) => {
-        const inicio = Date.now();
-        let completed = 0;
-        for (let i = 0; i < requisicoes; i++) {
-            axios.get('http://localhost:3000/coelba/1', (res) =>{
-                completed++;
-                if (completed === requisicoes){
-                    const tempototal = Date.now() - inicio;
-                    console.log(`Executado ${requisicoes} requisições em ${tempototal}ms`);
-                    console.log(`Tempo médio por requisição: ${tempototal / requisicoes}ms`)
+    const startServer = (port) => {
+        return new Promise((resolve) => {
+            const server = http.createServer((req, res) => {
+                if (req.url === '/coelba/1') {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(JSON.stringify({ message: 'Requisição bem-sucedida!' }));
+                } else {
+                    res.statusCode = 404;
+                    res.end('Not Found\n');
                 }
             });
+    
+            server.listen(port, () => {
+                console.log(`Servidor rodando em http://127.0.0.1:${port}/`);
+                resolve(server);
+            });
+        });
+    };
+    
+    // Funcão para realizar o teste de carga
+    const performLoadTest = async (numRequests, port) => {
+        const start = Date.now();
+        let completedRequests = 0;
+    
+        for (let i = 0; i < numRequests; i++) {
+            try {
+                await axios.get(`http://localhost:${port}/coelba/1`);
+                completedRequests++;
+            } catch (error) {
+                console.error('Erro na requisição:', error.message);
+            }
         }
-    }
-
-    performLoadTest(233); //Simula 1000 requisições     quebra 233
-
+        
+        const totalTime = Date.now() - start;
+        console.log(`Executado ${completedRequests} requisições em ${totalTime}ms`);
+        console.log(`Tempo médio por requisição: ${(totalTime / completedRequests).toFixed(2)}ms`);
+    };
+    
+    // Teste de carga
+    test('11 - Teste de Carga', async () => {
+        const port = 3000;
+        const server = await startServer(port);
+    
+        await performLoadTest(1000, port);  // Testando 1000 requisições
+    
+        server.close(() => {
+            console.log('Servidor encerrado.');
+        });
+    });
+    
 });
