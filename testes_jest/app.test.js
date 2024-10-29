@@ -7,16 +7,19 @@ const http = require('http');
         //Inserindo
         //conta
         await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Thiago Barros', 'thiaguinhomaroto@gmail.com', 'Barrosmello123', 1)");
-
         //formulario_inspecao
         await connection.query("INSERT INTO formulario_inspecao (numEstrutura, dataInsp, linhaTrans, Inspetor2, ativo, idConta) VALUES ('202', '2022-07-11', 'CatuRios', 'Marcos', '1', 1)");
-        
         //itens
         await connection.query("INSERT INTO itens (Faixa, Base, EstruMetalicas, CadeiadeIsol, CaboCondutor, ChaveSecc, ParaRaios, Sinaliz, id_form) VALUES ('C', 'NC', 'NA', 'C', 'C', 'NC', 'NA', 'C', 1)");
-
         //estrutura
         await connection.query("INSERT INTO estrutura (torre, concreto, susp, ancoragem, secc, metalica, devConcreto, sky, id_form) VALUES (1, 0, 0, 1, 0, 1, 0, 0, 1)");
 
+
+        //Inserindo para testar erros
+        //conta, senha menor que 8 digitos
+        await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Michael Scofield', 'scofield24@gmail.com', 'Sco4567', 0)");
+        //conta, senha maior que 16 digitos
+        await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Marcos Vinicius', 'vinicin234@gmail.com', 'Na0seioquecolocarparaatingir', 1)");
 }); 
 
     afterAll(async () => {
@@ -27,6 +30,7 @@ const http = require('http');
     await connection.query('TRUNCATE TABLE itens');
     await connection.query('TRUNCATE TABLE estrutura');
     await connection.query('TRUNCATE TABLE conta');
+
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');
     
     await connection.end();
@@ -97,11 +101,13 @@ const http = require('http');
     });
 
     //Garantir que a senha esteja em formato valido
-    test('6 - Garantir que a senha está em um formato válido', async () => {
+    test('6 - Garantir que a senha está em um formato e tamanho válido', async () => {
         const conta = await getContById(1);
         const passwordRegex = /^(?=.*[A-Z])(?=.*\d).+/;
     
         expect(conta.senha).toMatch(passwordRegex);
+        expect(conta.senha.length).toBeGreaterThanOrEqual(8);
+        expect(conta.senha.length).toBeLessThan(16);
     });
 
     //Formulario_inspecao e conta vericando parte do nome
@@ -205,8 +211,22 @@ const http = require('http');
         
     });
 
+    //Garantir que de erro quando for menor que 8 caracteres
+    test('10 - Garantir que de erro na senha com menos de 8 caracteres', async () => {
+        const menor = await getContById(2);
+        
+        expect(menor.senha.length).not.toBeGreaterThanOrEqual(8);
+    });
+
+    //Garantir que de erro quando for maior que 16 caracteres
+    test('11 - Garantir que de erro na senha for maior de 16 caracteres', async () => {
+        const maior = await getContById(3);
+
+        expect(maior.senha.length).not.toBeLessThanOrEqual(16);
+    });
+
     //Teste de desempenho
-    test('10 - Verificar se os "gets" responde em menos de 100ms', async () => {
+    test('12 - Verificar se os "gets" responde em menos de 100ms', async () => {
         const inicio = performance.now(); //Inicio da contagem
         await getFormById(1);
         await getItensById (1); 
@@ -230,7 +250,7 @@ const http = require('http');
                     res.end(JSON.stringify({ message: 'Requisição bem-sucedida!' }));
                 } else {
                     res.statusCode = 404;
-                    res.end('Not Found\n');
+                    res.end('erro, não achou\n');
                 }
             });
     
