@@ -1,25 +1,28 @@
 const { getFormById, getItensById, getEstruById, getDate, getContById, connection } = require('./db');
 const axios = require('axios'); 
 const http = require('http');
+//Crip
+const { hashSenha, comparador } = require('./hasher_test.js');
 
     beforeAll(async () => {
 
+
+        //Criptografando senha antes de enviar
+        const senhaOriginal = 'Barrosmello123';
+        const senhaCriptografada = await hashSenha(senhaOriginal);
+
         //Inserindo
         //conta
-        await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Thiago Barros', 'thiaguinhomaroto@gmail.com', 'Barrosmello123', 1)");
+        await connection.query(
+            "INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES (?, ?, ?, ?)",
+            ['Thiago Barros', 'thiaguinhomaroto@gmail.com', senhaCriptografada, 1] //Inserindo senha crip
+        );
         //formulario_inspecao
         await connection.query("INSERT INTO formulario_inspecao (numEstrutura, dataInsp, linhaTrans, Inspetor2, ativo, idConta) VALUES ('202', '2022-07-11', 'CatuRios', 'Marcos', '1', 1)");
         //itens
         await connection.query("INSERT INTO itens (Faixa, Base, EstruMetalicas, CadeiadeIsol, CaboCondutor, ChaveSecc, ParaRaios, Sinaliz, id_form) VALUES ('C', 'NC', 'NA', 'C', 'C', 'NC', 'NA', 'C', 1)");
         //estrutura
         await connection.query("INSERT INTO estrutura (torre, concreto, susp, ancoragem, secc, metalica, devConcreto, sky, id_form) VALUES (1, 0, 0, 1, 0, 1, 0, 0, 1)");
-
-
-        //Inserindo para testar erros
-        //conta, senha menor que 8 digitos
-        await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Michael Scofield', 'scofield24@gmail.com', 'Sco4567', 0)");
-        //conta, senha maior que 16 digitos
-        await connection.query("INSERT INTO conta (nomePe, emailPe, senha, nivel) VALUES ('Marcos Vinicius', 'vinicin234@gmail.com', 'Na0seioquecolocarparaatingir', 1)");
 }); 
 
     afterAll(async () => {
@@ -42,7 +45,7 @@ const http = require('http');
     //Formulario_inspecao
     test('1 - puxando do formulario_inspecao', async () => {
         const formulario_inspecao = await getFormById(1);
-        // toHaveProperty matcher doo jest para verificar se um objeto possui uma propriedade especifica
+
         expect(formulario_inspecao).toHaveProperty('numEstrutura', 202);
         expect(formulario_inspecao.dataInsp.toISOString().split('T')[0]).toBe('2022-07-11');
         expect(formulario_inspecao).toHaveProperty('linhaTrans', 'CatuRios');
@@ -87,9 +90,13 @@ const http = require('http');
 
         expect(conta).toHaveProperty('nomePe', 'Thiago Barros');
         expect(conta).toHaveProperty('emailPe', 'thiaguinhomaroto@gmail.com');
-        expect(conta).toHaveProperty('senha', 'Barrosmello123');
         expect(conta).toHaveProperty('nivel', 1);
 
+        const senhaInserida = 'Barrosmello123'; 
+
+        // Garantir que é a mesma senha
+        const validaSenha = await comparador(senhaInserida, conta.senha);
+        expect(validaSenha).toBe(true);
     });
 
     //Garantir que email esteja em formato válido
@@ -100,18 +107,8 @@ const http = require('http');
         expect(conta.emailPe).toMatch(emailRegex);
     });
 
-    //Garantir que a senha esteja em formato valido
-    test('6 - Garantir que a senha está em um formato e tamanho válido', async () => {
-        const conta = await getContById(1);
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).+/;
-    
-        expect(conta.senha).toMatch(passwordRegex);
-        expect(conta.senha.length).toBeGreaterThanOrEqual(8);
-        expect(conta.senha.length).toBeLessThan(16);
-    });
-
     //Formulario_inspecao e conta vericando parte do nome
-    test('7 - verifica parte do nome', async () => {
+    test('6 - verifica parte do nome', async () => {
         const formulario_inspecao = await getFormById(1);
         const conta = await getContById(1);
 
@@ -122,7 +119,7 @@ const http = require('http');
     });
 
     //Formulario_inspecao, estrutura, Itens e Conta vericando que não seja null
-    test('8 - garantir que não sejam NUll ou Undefined', async () => {
+    test('7 - garantir que não sejam NUll ou Undefined', async () => {
         const formulario_inspecao = await getFormById(1);
         const itens = await getItensById(1);
         const conta = await getContById(1);
@@ -200,33 +197,82 @@ const http = require('http');
     });
 
     //Datas especificas
-    test('9 - Deve retornar o Form entre as datas especificadas', async () => {
+    test('8 - Deve retornar o Form entre as datas especificadas', async () => {
         const form = await getDate('2022-07-08','2022-07-13');
         const itens = await getItensById(form.id_form);
         const estrutura = await getEstruById(form.id_form);
+        const conta = await getContById(form.idConta)
 
         expect(form).toHaveProperty('Inspetor2', 'Marcos', 'numEstrutura', '202', 'dataInsp', '2022-07-11', 'linhaTrans', 'CatuRios');
         expect(itens).toHaveProperty('Faixa', 'C', 'Base', 'NC', 'EstruMetalicas', 'NA', 'CadeiadeIsol', 'C', 'CaboCondutor', 'C', 'ChaveSecc', 'NC', 'ParaRaios', 'NA', 'Sinaliz', 'C')
         expect(estrutura).toHaveProperty('torre', 1, 'concreto', 0, 'susp', 0, 'ancoragem', 1, 'secc', 0, 'metalica', 1, 'devConcreto', 0, 'sky', 0);
+        expect(conta).toHaveProperty('nomePe', 'Thiago Barros', 'emailPe', 'thiaguinhomaroto@gmail.com', 'nivel', 1);
+
+        const senhaInserida = 'Barrosmello123'; 
+
+        // Garantir que é a mesma senha
+        const validaSenha = await comparador(senhaInserida, conta.senha);
+        expect(validaSenha).toBe(true);
         
     });
 
-    //Garantir que de erro quando for menor que 8 caracteres
-    test('10 - Garantir que de erro na senha com menos de 8 caracteres', async () => {
-        const menor = await getContById(2);
+    //TESTES NA VALIDAÇÃO DE SENHA E CRIPTOGRAFIA
+
+    //Garantir a criptografia e validando a senha
+    test('9 - Garantir que esteja criptografando e validando a senha corretamente', async () => {
+        const senhaCriptografada = await hashSenha('Senha123'); //Criptografando
+        const senhaErrada = await hashSenha('SenhaErrada223');
         
-        expect(menor.senha.length).not.toBeGreaterThanOrEqual(8);
+        // Validar a senha crip não é igual a senha og
+        expect(senhaCriptografada).not.toBe('Senha123');
+        // Validar a senhaErrada crip não é igual a senhaErrada og
+        expect(senhaErrada).not.toBe('SenhaErrada223');
+        
+        // Testar que uma senha incorreta não é válida
+        const validacaoIncorreta = await comparador(senhaErrada, senhaCriptografada);
+        expect(validacaoIncorreta).toBe(false);
     });
 
-    //Garantir que de erro quando for maior que 16 caracteres
-    test('11 - Garantir que de erro na senha for maior de 16 caracteres', async () => {
-        const maior = await getContById(3);
-
-        expect(maior.senha.length).not.toBeLessThanOrEqual(16);
+    //Verificação da crip de senha
+    test('10 - Garantir que a senha crip não seja igual a senha inserida', async () => {
+        const senhaOriginal = 'SenhaSegura123';
+        const senhaCriptografada = await hashSenha(senhaOriginal);
+    
+        // Verifica se não é igual
+        expect(senhaCriptografada).not.toBe(senhaOriginal);
     });
+
+    //Validando tamanho de string e Regex na senha
+    test('11 - Validar senhaRegex e tamanho', async () => {
+        const conta = await getContById(1);
+        const senhaInserida = 'Barrosmello123';
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).+/;
+
+        expect(senhaInserida.length).toBeGreaterThanOrEqual(8); //Não pode ser menor que 8 
+        expect(senhaInserida.length).toBeLessThanOrEqual(16); //Não poode ser maior que 16
+    
+        // Validação da senha 
+        expect(senhaInserida).toMatch(passwordRegex);
+    
+        // Garantir que é a mesma senha
+        const validaSenha = await comparador(senhaInserida, conta.senha);
+        expect(validaSenha).toBe(true); 
+    });
+
+    //Validar senha
+    test('12 - Garantir que uma senha sem letra maiúscula e sem numero não é valida', async () => {
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).+/;
+        const senhaMaiuscula = 'senha123';
+        const senhaNumero = 'Senhas';
+
+        expect(senhaMaiuscula).not.toMatch(passwordRegex); 
+        expect(senhaNumero).not.toMatch(passwordRegex); 
+    });
+    
+    //TESTES DE DESEMPENHO E CARGA  
 
     //Teste de desempenho
-    test('12 - Verificar se os "gets" responde em menos de 100ms', async () => {
+    test('13 - Verificar se os "gets" responde em menos de 100ms', async () => {
         const inicio = performance.now(); //Inicio da contagem
         await getFormById(1);
         await getItensById (1); 
@@ -281,7 +327,7 @@ const http = require('http');
     };
     
     // Teste de carga
-    test('11 - Teste de Carga', async () => {
+    test('14 - Teste de Carga', async () => {
         const port = 3000;
         const server = await startServer(port);
     

@@ -1,6 +1,6 @@
 const express = require ('express');
 const app = express();
-const { getFormById, getItensById, getEstruById } = require('./db');
+const { getFormById, getItensById, getEstruById, getContById } = require('./db');
 
 app.get('/coelba/:id', async (req, res) =>{
     const { id } = req.params;
@@ -33,6 +33,17 @@ app.get('/coelba/:id', async (req, res) =>{
             res.json(estrutura);
         } else {
             res.status(404).json({ message: 'estrutura não tem'});
+        }
+    } catch (error) {
+        res.status(500).json ({ message: 'Erro de conexão com o BD' })
+    }
+    //Conta
+    try {
+        const conta = await getContById(id);
+        if (conta){
+            res.json(conta);
+        } else {
+            res.status(404).json({ message: 'conta não tem'});
         }
     } catch (error) {
         res.status(500).json ({ message: 'Erro de conexão com o BD' })
