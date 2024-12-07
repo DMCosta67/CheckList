@@ -1,0 +1,34 @@
+body,html {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+}
+#root{
+  width: 100%;
+  height: 100%;
+}
+.App{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(171deg, rgb(61, 70, 219) 1%, rgb(3, 215, 21) 100%);
+}
+.ini{
+  position: fixed;
+  top: 0;
+  left: 2em;
+  font-size: 1.2em;
+  font-weight: bold;
+  text-decoration: underline;
+}
+.ini p{
+  cursor: pointer;
+}

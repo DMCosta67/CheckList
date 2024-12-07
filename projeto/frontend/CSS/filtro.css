@@ -1,0 +1,24 @@
+.filt{
+    width: 35em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2em;
+}
+.filtB{
+    width: 10em;
+    margin: 0;
+}
+.filtInps{
+    display: flex;
+    flex-direction: column;
+    width: 15em;
+}
+.filtInps input{
+    text-align: center;
+}
+.filtrar{
+    width: 8em;
+    Align-self: center;
+}

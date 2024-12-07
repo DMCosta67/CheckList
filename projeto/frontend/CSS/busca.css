@@ -1,0 +1,27 @@
+.busca{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+}
+.forms{
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 1em;
+    margin-bottom: 1.5em;
+}
+.card {
+    width: 18em;
+    background: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+.titu{
+    width: 15em;
+    text-align: center;
+}

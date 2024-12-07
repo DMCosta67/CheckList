@@ -1,0 +1,56 @@
+.login {
+    background-color: rgba(209, 207, 207, 0.486);
+    border-radius: 3.5em;
+    width: 32em;
+    height: 32em;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 4em;
+}
+
+.logo {
+    width: 200px;
+    height: 110px;
+}
+
+.mini {
+    width: 195px;
+    height: 175px;
+}
+
+.loginF {
+    width: 20em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loginF p {
+    font-weight: bolder;
+}
+
+.loginF input {
+    width: 90%;
+    height: 2em;
+    background-color: rgba(255, 255, 255, 0.897);
+    border-radius: 1em;
+    border-color: gray;
+    padding: 0.3em;
+}
+
+.logar {
+    align-self: center;
+    color: green;
+    font-weight: bold;
+    background-color: white;
+    width: 50%;
+    margin-top: 1em;
+}
+
+.logar:hover {
+    color: white;
+    background-color: green;
+}

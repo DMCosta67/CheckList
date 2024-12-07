@@ -1,0 +1,41 @@
+.sup{
+  margin-top: 5em;
+  margin-bottom: 4em;
+}
+.back {
+  display: flex;
+  justify-content: end;
+}
+
+.back p {
+  width: 12em;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: end;
+  margin-bottom: 2em;
+}
+
+.supTitulo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.supInps {
+  background-color: rgba(209, 207, 207, 0.486);
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+.supInps input{
+  border-radius: 0.2em;
+}
+.supInps select{
+  height: 30px;
+}

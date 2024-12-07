@@ -1,0 +1,39 @@
+.logoTP {
+  width: 210px;
+  height: 165px;
+  margin-bottom: 2em;
+}
+
+.secao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(209, 207, 207, 0.486);
+  border-radius: 3.5em;
+  width: 32em;
+  height: 32em;
+  margin-top: 4em;
+  margin-bottom: 2em;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.botao_menu {
+  margin-top: 1em;
+  background-color: #5dcf4e;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 13em;
+}
+
+.botao_menu:hover {
+  background-color: #36703b;
+}
